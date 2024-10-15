@@ -1,4 +1,6 @@
 // main.js
+import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/webxr/ARButton.js';
+
 let scene, camera, renderer, controller;
 let reticle; // To detect surfaces
 let model;   // The 3D model we will load
