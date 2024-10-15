@@ -56,6 +56,7 @@
 			let controller;
 
 			let reticle, pmremGenerator, current_object, controls, envmap;
+			let cubeCamera, shadowPlane;
 
 			let hitTestSource = null;
 			let hitTestSourceRequested = false;
@@ -83,6 +84,7 @@
 				if ( reticle.visible ) {
 					current_object.position.setFromMatrixPosition(reticle.matrix);
 					current_object.visible = true;
+					shadowPlane.position.copy(current_object.position);
 				}
 			}
 
@@ -103,6 +105,12 @@
             loader.load(model + ".glb", function(glb) {
 
               current_object = glb.scene;
+			  current_object.traverse(function(child) {
+                if (child.isMesh) {
+                  child.material.envMap = cubeCamera.renderTarget.texture; // Reflejos usando CubeCamera
+                  child.castShadow = true;
+                }
+              });
               scene.add(current_object);
 
               arPlace();
@@ -127,14 +135,15 @@
 
 				scene = new THREE.Scene();
 				window.scene = scene;
+				camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 200);
 
-				camera = new THREE.PerspectiveCamera( 70, window.innerWidth / window.innerHeight, 0.001, 200 );
-
-				var directionalLight = new THREE.DirectionalLight(0xdddddd, 1);
-				directionalLight.position.set(0, 0, 1).normalize();
+				// Direccional y ambiental
+				let directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+				directionalLight.position.set(0, 10, 10);
+				directionalLight.castShadow = true;
 				scene.add(directionalLight);
 
-				var ambientLight = new THREE.AmbientLight(0x222222);
+				let ambientLight = new THREE.AmbientLight(0x404040, 0.5);
 				scene.add(ambientLight);
 
 				//
@@ -156,17 +165,28 @@
 				controls.enableDamping = true;
 				controls.dampingFactor = 0.05;
 
+				// CubeCamera para reflejos
+				const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, { format: THREE.RGBAFormat });
+				cubeCamera = new THREE.CubeCamera(0.1, 1000, cubeRenderTarget);
+				scene.add(cubeCamera);
+
+				// Plano para sombra de contacto
+				shadowPlane = new THREE.Mesh(
+				new THREE.PlaneGeometry(1, 1),
+				new THREE.ShadowMaterial({ opacity: 0.5 })
+				);
+				shadowPlane.rotation.x = - Math.PI / 2;
+				shadowPlane.receiveShadow = true;
+				scene.add(shadowPlane);
 				//AR SETUP
 
 				let options = {
 					requiredFeatures: ['hit-test'],
 					optionalFeatures: ['dom-overlay'],
-          domOverlay: { root: document.getElementById('content')}
+					domOverlay: { root: document.getElementById('content')}
 				}
 
 				document.body.appendChild( ARButton.createButton(renderer, options));
-
-				//document.body.appendChild( ARButton.createButton( renderer, { requiredFeatures: [ 'hit-test' ] } ) );
 
 
 				reticle = new THREE.Mesh(
@@ -299,7 +319,8 @@
 					}
 
 				}
-
+				
+				cubeCamera.update(renderer, scene);
 				renderer.render( scene, camera );
 
 			}
