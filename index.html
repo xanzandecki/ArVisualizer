@@ -161,9 +161,8 @@
 				let options = {
 					requiredFeatures: ['hit-test'],
 					optionalFeatures: ['dom-overlay'],
+          domOverlay: { root: document.getElementById('content')}
 				}
-
-				options.domOverlay = { root: document.getElementById('content')};
 
 				document.body.appendChild( ARButton.createButton(renderer, options));
 
