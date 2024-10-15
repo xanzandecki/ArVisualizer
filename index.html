@@ -85,6 +85,7 @@
 					current_object.position.setFromMatrixPosition(reticle.matrix);
 					current_object.visible = true;
 					shadowPlane.position.copy(current_object.position);
+					shadowPlane.position.y -= 0.01;
 				}
 			}
 
@@ -172,10 +173,11 @@
 
 				// Plano para sombra de contacto
 				shadowPlane = new THREE.Mesh(
-				new THREE.PlaneGeometry(1, 1),
-				new THREE.ShadowMaterial({ opacity: 0.5 })
+					new THREE.PlaneGeometry(1, 1),
+					new THREE.ShadowMaterial({ opacity: 0.8 })
 				);
 				shadowPlane.rotation.x = - Math.PI / 2;
+				shadowPlane.position.y = -0.01;				
 				shadowPlane.receiveShadow = true;
 				scene.add(shadowPlane);
 				//AR SETUP
@@ -319,7 +321,7 @@
 					}
 
 				}
-				
+
 				cubeCamera.update(renderer, scene);
 				renderer.render( scene, camera );
 
