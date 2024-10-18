@@ -1,332 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>three.js ar - hit test</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<head>
+    <title>AR with Model-Viewer</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <link type="text/css" rel="stylesheet" href="main.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-	</head>
-	<body>
+    <script src="https://unpkg.com/@google/model-viewer"></script>
+</head>
+<body>
 
     <div id="content">
-			<div id="mySidenav" class="sidenav">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        <a class="ar-object" id="1" href="#">item_1</a>
-      </div>
+        <div id="mySidenav" class="sidenav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <a class="ar-object" id="item_1" href="#">Item 1</a>
+            <a class="ar-object" id="item_2" href="#">Item 2</a>
+        </div>
 
-    <div id="container" style="position: fixed;"></div>
-    
-    <span style="font-size:30px;cursor:pointer;position: absolute;" onclick="openNav()">&#9776; open</span>		
-    
-    <button type="button" id="place-button">PLACE</button>
+        <span style="font-size:30px;cursor:pointer;" onclick="openNav()">&#9776; open</span>
+
+        <model-viewer id="modelViewer" src="Assets/1.glb" ios-src="Assets/1.usdz" ar ar-scale="fixed" camera-controls auto-rotate style="width: 100%; height: 100vh;" alt="3D Model">
+        </model-viewer>
+
+        <button type="button" id="place-button" style="position: absolute;">PLACE</button>
     </div>
-    
+
     <script>
-      function openNav() {
-        document.getElementById("mySidenav").style.width = "250px";
-      }
-      
-      function closeNav() {
-        document.getElementById("mySidenav").style.width = "0";
-      }
+        function openNav() {
+            document.getElementById("mySidenav").style.width = "250px";
+        }
+
+        function closeNav() {
+            document.getElementById("mySidenav").style.width = "0";
+        }
+
+        $(".ar-object").click(function() {
+            // Change the model based on the selected item
+            let selectedModel = $(this).attr("id");
+            switchModel(selectedModel);
+        });
+
+        function switchModel(modelId) {
+            let modelViewer = document.getElementById("modelViewer");
+            if (modelId === "item_1") {
+                modelViewer.src = "Assets/1.glb";
+                modelViewer.setAttribute('ios-src', 'Assets/1.usdz');
+            } else if (modelId === "item_2") {
+                modelViewer.src = "Assets/model2.glb";
+                modelViewer.setAttribute('ios-src', 'Assets/model2.usdz');
+            }
+        }
+
+        // No need for manual hit test or placement; Model-Viewer handles AR natively
+        document.getElementById("place-button").addEventListener("click", function() {
+            let viewer = document.querySelector('model-viewer');
+            viewer.activateAR();
+        });
     </script>
-       
-
-		<script type="importmap">
-			{
-				"imports": {
-					"three": "./build/three.module.js",
-					"three/addons/": "./jsm/"
-				}
-			}
-		</script>
-
-		<script type="module">
-
-			import * as THREE from './build/three.module.js';
-			import { ARButton } from './jsm/webxr/ARButton.js';
-
-			import { OrbitControls } from './jsm/controls/OrbitControls.js';
-			import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-			import { RGBELoader } from './jsm/loaders/RGBELoader.js';
-
-			let container;
-			let camera, scene, renderer;
-			let controller;
-
-			let reticle, pmremGenerator, current_object, controls, envmap;
-			let cubeCamera, shadowPlane;
-
-			let hitTestSource = null;
-			let hitTestSourceRequested = false;
-
-			init();
-			animate();
-
-      $(".ar-object").click(function(){
-        if(current_object != null){
-					scene.remove(current_object);
-				}
-
-        loadModel($(this).attr("id"));
-      });
-      
-			$("#ARButton").click(function(){
-				current_object.visible = false;
-			});
-
-			$("#place-button").click(function(){
-				arPlace();
-			});
-
-			function arPlace(){
-				if ( reticle.visible ) {
-					current_object.position.setFromMatrixPosition(reticle.matrix);
-					current_object.visible = true;
-					shadowPlane.position.copy(current_object.position);
-					shadowPlane.position.y -= 0.01;
-				}
-			}
-
-      function loadModel(model){
-        new RGBELoader()
-          .setDataType(THREE.FloatType)
-          .setPath('textures/')
-          .load('photo_studio_01_1k.hdr', function(texture){
-
-            envmap = pmremGenerator.fromEquirectangular(texture).texture;
-
-            scene.environment = envmap;
-            texture.dispose();
-            pmremGenerator.dispose();
-            render();
-
-            var loader = new GLTFLoader().setPath('Assets/');
-            loader.load(model + ".glb", function(glb) {
-
-              current_object = glb.scene;
-			  current_object.traverse(function(child) {
-                if (child.isMesh) {
-                  child.material.envMap = cubeCamera.renderTarget.texture; // Reflejos usando CubeCamera
-                  child.castShadow = true;
-                }
-              });
-              scene.add(current_object);
-
-              arPlace();
-
-              var box = new THREE.Box3();
-              box.setFromObject(current_object);
-
-              var center = new THREE.Vector3();
-              box.getCenter(center);
-              controls.target.copy(center); 
-
-              controls.update();
-              render();
-            });
-          });
-      }
-
-			function init() {
-
-				container = document.createElement( 'div' );
-				document.getElementById("container").appendChild( container );
-
-				scene = new THREE.Scene();
-				window.scene = scene;
-				camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.001, 200);
-
-				// Direccional y ambiental
-				let directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-				directionalLight.position.set(0, 10, 10);
-				directionalLight.castShadow = true;
-				scene.add(directionalLight);
-
-				let ambientLight = new THREE.AmbientLight(0x404040, 0.5);
-				scene.add(ambientLight);
-
-				//
-
-				renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				renderer.xr.enabled = true;
-				container.appendChild( renderer.domElement );
-
-        pmremGenerator = new THREE.PMREMGenerator(renderer);
-        pmremGenerator.compileEquirectangularShader();
-
-				controls = new OrbitControls(camera, renderer.domElement);
-				controls.addEventListener('change', render);
-				controls.minDistance = 2;
-				controls.maxDistance = 10;
-				controls.target.set(0, 0, -0.2);
-				controls.enableDamping = true;
-				controls.dampingFactor = 0.05;
-
-				// CubeCamera para reflejos
-				const cubeRenderTarget = new THREE.WebGLCubeRenderTarget(256, { format: THREE.RGBAFormat });
-				cubeCamera = new THREE.CubeCamera(0.1, 1000, cubeRenderTarget);
-				scene.add(cubeCamera);
-
-				// Plano para sombra de contacto
-				shadowPlane = new THREE.Mesh(
-					new THREE.PlaneGeometry(1, 1),
-					new THREE.ShadowMaterial({ opacity: 0.8 })
-				);
-				shadowPlane.rotation.x = - Math.PI / 2;
-				shadowPlane.position.y = -0.01;				
-				shadowPlane.receiveShadow = true;
-				scene.add(shadowPlane);
-				//AR SETUP
-
-				let options = {
-					requiredFeatures: ['hit-test'],
-					optionalFeatures: ['dom-overlay'],
-					domOverlay: { root: document.getElementById('content')}
-				}
-
-				document.body.appendChild( ARButton.createButton(renderer, options));
-
-
-				reticle = new THREE.Mesh(
-					new THREE.RingGeometry( 0.15, 0.2, 32 ).rotateX( - Math.PI / 2 ),
-					new THREE.MeshBasicMaterial()
-				);
-				reticle.matrixAutoUpdate = false;
-				reticle.visible = false;
-				scene.add( reticle );
-
-				//
-
-				window.addEventListener( 'resize', onWindowResize, false );
-
-				renderer.domElement.addEventListener('touchstart', function(e){
-					e.preventDefault();
-					touchDown=true;
-					touchX = e.touches[0].pageX;
-					touchY = e.touches[0].pageY;
-				}, false);
-
-				renderer.domElement.addEventListener('touchend', function(e){
-					e.preventDefault();
-					touchDown = false;
-				}, false);
-
-				renderer.domElement.addEventListener('touchmove', function(e){
-					e.preventDefault();
-					
-					if(!touchDown){
-						return;
-					}
-
-					deltaX = e.touches[0].pageX - touchX;
-					deltaY = e.touches[0].pageY - touchY;
-					touchX = e.touches[0].pageX;
-					touchY = e.touches[0].pageY;
-
-					rotateObject();
-
-				}, false);
-
-			}
-
-			var touchDown, touchX, touchY, deltaX, deltaY;
-
-			function rotateObject(){
-				if(current_object && reticle.visible){
-					current_object.rotation.y += deltaX / 100;
-				}			
-      }
-
-			function onWindowResize() {
-
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
-
-				renderer.setSize( window.innerWidth, window.innerHeight );
-
-			}
-
-			//
-
-			function animate() {
-
-				renderer.setAnimationLoop( render );
-				requestAnimationFrame(animate);
-				controls.update();
-
-			}
-
-			function render( timestamp, frame ) {
-
-				if ( frame ) {
-
-					const referenceSpace = renderer.xr.getReferenceSpace();
-					const session = renderer.xr.getSession();
-
-					if ( hitTestSourceRequested === false ) {
-
-						session.requestReferenceSpace( 'viewer' ).then( function ( referenceSpace ) {
-
-							session.requestHitTestSource( { space: referenceSpace } ).then( function ( source ) {
-
-								hitTestSource = source;
-
-							} );
-
-						} );
-
-						session.addEventListener( 'end', function () {
-
-							hitTestSourceRequested = false;
-							hitTestSource = null;
-
-							reticle.visible = false;
-
-							var box = new THREE.Box3();
-							box.setFromObject(current_object);
-							box.center(controls.target);
-
-							document.getElementById("place-button").style.display = "none";
-						} );
-
-						hitTestSourceRequested = true;
-
-					}
-
-					if ( hitTestSource ) {
-
-						const hitTestResults = frame.getHitTestResults( hitTestSource );
-
-						if ( hitTestResults.length ) {
-
-							const hit = hitTestResults[ 0 ];
-
-							document.getElementById("place-button").style.display = "block";
-
-							reticle.visible = true;
-							reticle.matrix.fromArray( hit.getPose( referenceSpace ).transform.matrix );
-
-						} else {
-
-							reticle.visible = false;
-
-
-							document.getElementById("place-button").style.display = "none";
-						}
-
-					}
-
-				}
-
-				cubeCamera.update(renderer, scene);
-				renderer.render( scene, camera );
-
-			}
-
-		</script>
-	</body>
+</body>
 </html>
