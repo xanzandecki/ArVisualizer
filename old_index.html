@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+   <head>
+        <title>FLOR_90K</title>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+        <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+        <script src="https://rawgit.com/msj121/aframeFrogShaders/master/aframe-shader-frog.js"></script>
+        <script src="js/swiped-events.min.js"></script>
+		<script>
+		    
+		AFRAME.registerComponent('loader', {
+		init: function() {
+		    
+		        var objetos = 1;
+		        let planta_1 = document.querySelector("#glbtest_1");
+		        let ar_i_1 = document.querySelector("#text1");
+		        let ar_d_1 = document.querySelector("#text2");
+		        let ab_i_1 = document.querySelector("#text3");
+		        let ab_d_1 = document.querySelector("#text4");
+		        let logo_1 = document.querySelector("#logo");
+		        var modelo = "models/flor";
+		        var ab_i = "img/ab_i";
+		        var ab_d = "img/ab_d";
+		        var ar_i = "img/ar_i";
+		        var ar_d = "img/ar_d";
+		        var logo = "img/logo";
+		    
+		        document.addEventListener('swiped-left', function(e) {
+		            objetos = objetos + 1;
+			        if (objetos >= 3) {
+			            objetos = 1;
+			        }
+
+		            modelo += objetos;
+		        	modelo += ".glb";
+		        	planta_1.setAttribute("gltf-model", modelo);
+		        	modelo = "models/flor";
+
+		        	ab_i += objetos;
+		        	ab_i += ".png";
+		        	ab_i_1.setAttribute("src", ab_i);
+		        	ab_i = "img/ab_i";
+
+		        	ab_d += objetos;
+		        	ab_d += ".png";
+		        	ab_d_1.setAttribute("src", ab_d);
+		        	ab_d = "img/ab_d";
+
+		        	ar_i += objetos;
+		        	ar_i += ".png";
+		        	ar_i_1.setAttribute("src", ar_i);
+		        	ar_i = "img/ar_i";
+
+		        	ar_d += objetos;
+		        	ar_d += ".png";
+		        	ar_d_1.setAttribute("src", ar_d);
+		        	ar_d = "img/ar_d";
+
+		        });
+
+		        document.addEventListener('swiped-right', function(e) {
+		            objetos = objetos - 1;
+		            if (objetos <= 0) {
+			            objetos = 2;
+			        }
+
+			        modelo += objetos;
+		        	modelo += ".glb";
+		        	planta_1.setAttribute("gltf-model", modelo);
+		        	modelo = "models/flor";
+
+		        	ab_i += objetos;
+		        	ab_i += ".png";
+		        	ab_i_1.setAttribute("src", ab_i);
+		        	ab_i = "img/ab_i";
+
+		        	ab_d += objetos;
+		        	ab_d += ".png";
+		        	ab_d_1.setAttribute("src", ab_d);
+		        	ab_d = "img/ab_d";
+
+		        	ar_i += objetos;
+		        	ar_i += ".png";
+		        	ar_i_1.setAttribute("src", ar_i);
+		        	ar_i = "img/ar_i";
+
+		        	ar_d += objetos;
+		        	ar_d += ".png";
+		        	ar_d_1.setAttribute("src", ar_d);
+		        	ar_d = "img/ar_d";
+		        });
+		    }
+		})
+
+		</script>
+	    <style type="text/css">
+	        #name {position: absolute; top: 0; left: 0; width: 100%; height: 1rem;}
+	    </style>
+    </head>
+    <body data-swipe-threshold="100">
+       
+    	<div id="name" class="title"></div>
+    	<div id="izq" onclick="izquierda()"><img src="img/flecha_izq.svg" style="top: calc(50% - 20px);left: 10px;height: 40px;z-index: 1000000;position: absolute;filter: drop-shadow(0px 0px 2px #fff);"></div>
+    	<div id="drx" onclick="derecha()"><img src="img/flecha_drx.svg" style="top: calc(50% - 20px);right: 10px;height: 40px;z-index: 1000000;position: absolute;filter: drop-shadow(0px 0px 2px #fff);"></div>
+       
+    	<a-scene
+	        loading-screen="enabled: false"
+	        vr-mode-ui="enabled: false"
+	        embedded arjs="sourceType: webcam; debugUIEnabled: false;"
+	        renderer="antialias: true; logarithmicDepthBuffer: true;">   
+		
+			<a-assets>
+
+	            <a-asset-item id="glbtestmodel_1" src="models/flor1.glb"></a-asset-item>
+	            <a-asset-item id="glbtestmodel_2" src="models/flor2.glb"></a-asset-item>
+
+	            <img id="text1_img" crossorigin="anonymous" src="img/ar_i1.png">
+	            <img id="text2_img" crossorigin="anonymous" src="img/ar_d1.png">
+	            <img id="text3_img" crossorigin="anonymous" src="img/ab_i1.png">
+	            <img id="text4_img" crossorigin="anonymous" src="img/ab_d1.png">
+	            <img id="logo_img" crossorigin="anonymous" src="img/logo1.png">
+
+	        </a-assets>
+
+	        <a-marker
+		        id="animated-marker"
+		        type="pattern"
+		        preset="hiro"
+		        raycaster="objects: .clickable"
+		        emitevents="true"
+		        cursor="fuse: false; rayOrigin: mouse;"
+		        id="markerA"
+		      	>
+	        
+
+		        <a-image loader src="img/25.png" scale="" class="clickable" rotation="-90 0 0" gesture-handler="" material="" geometry="">
+				</a-image>
+				
+		        <a-entity id="glbtest_1" gltf-model="models/flor1.glb" position="0.04 -0.66 -0.27" scale="0.06 0.06 0.06">
+		        </a-entity>
+
+		        <a-entity>
+		            <a-image id="text1" src="img/ar_i1.png" width="5.12" height="5.12" scale="0.4 0.4 0.4" position="-0.7 1.5 -0.1" visible="" material="" geometry="width: 3.85; height: 0.7" rotation="-25.5 27.8 -12.6"></a-image>
+		        </a-entity>
+
+		        <a-entity>
+		            <a-image id="text2" src="img/ar_d1.png" width="5.12" height="5.12" scale="0.4 0.4 0.4" position="0.7 1.5 -0.1" visible="" material="" geometry="width: 3.85; height: 0.7" rotation="-25.5 -27.8 12.6"></a-image>
+		        </a-entity>
+
+		        <a-entity>
+		            <a-image id="text3" src="img/ab_i1.png" width="5.12" height="5.12" scale="0.4 0.4 0.4" position="-0.7 0.8 -0.1" visible="" material="" geometry="width: 3; height: 2.5" rotation="-25.5 27.8 -12.6"></a-image>
+		        </a-entity>
+
+		        <a-entity>
+		            <a-image id="text4" src="img/ab_d1.png" width="5.12" height="5.12" scale="0.4 0.4 0.4" position="0.7 0.8 -0.1" visible="" material="" geometry="width: 3; height: 2.5" rotation="-25.5 -27.8 12.6"></a-image>
+		        </a-entity>
+		        
+		        <a-entity>
+		            <a-image id="logo" src="img/logo1.png" width="5.12" height="5.12" scale="1 0.2 1" position="0 1.9 -0.1" visible="" material="" geometry="width: 3; height: 2.5" rotation="-25 0 0"></a-image>
+		        </a-entity>
+		        
+		      	                   
+	        </a-marker>
+	          
+			
+	        
+	      	<a-entity camera="near:0.01; far:10000"> </a-entity>
+          
+      	</a-scene>
+      	<script>
+      	var objetos = 1;
+        let planta_1 = document.querySelector("#glbtest_1");
+        let ar_i_1 = document.querySelector("#text1");
+        let ar_d_1 = document.querySelector("#text2");
+        let ab_i_1 = document.querySelector("#text3");
+        let ab_d_1 = document.querySelector("#text4");
+        let logo_1 = document.querySelector("#logo");
+        var modelo = "models/flor";
+        var ab_i = "img/ab_i";
+        var ab_d = "img/ab_d";
+        var ar_i = "img/ar_i";
+        var ar_d = "img/ar_d";
+        var logo = "img/logo";
+
+  		function izquierda(){
+            objetos = objetos - 1;
+            if (objetos <= 0) {
+	            objetos = 2;
+	        }
+
+	        modelo += objetos;
+        	modelo += ".glb";
+        	planta_1.setAttribute("gltf-model", modelo);
+        	modelo = "models/flor";
+
+        	ab_i += objetos;
+        	ab_i += ".png";
+        	ab_i_1.setAttribute("src", ab_i);
+        	ab_i = "img/ab_i";
+
+        	ab_d += objetos;
+        	ab_d += ".png";
+        	ab_d_1.setAttribute("src", ab_d);
+        	ab_d = "img/ab_d";
+
+        	ar_i += objetos;
+        	ar_i += ".png";
+        	ar_i_1.setAttribute("src", ar_i);
+        	ar_i = "img/ar_i";
+
+        	ar_d += objetos;
+        	ar_d += ".png";
+        	ar_d_1.setAttribute("src", ar_d);
+        	ar_d = "img/ar_d";
+		}
+
+		function derecha(){
+            objetos = objetos + 1;
+            if (objetos >= 3) {
+	            objetos = 1;
+	        }
+
+	        modelo += objetos;
+        	modelo += ".glb";
+        	planta_1.setAttribute("gltf-model", modelo);
+        	modelo = "models/flor";
+
+        	ab_i += objetos;
+        	ab_i += ".png";
+        	ab_i_1.setAttribute("src", ab_i);
+        	ab_i = "img/ab_i";
+
+        	ab_d += objetos;
+        	ab_d += ".png";
+        	ab_d_1.setAttribute("src", ab_d);
+        	ab_d = "img/ab_d";
+
+        	ar_i += objetos;
+        	ar_i += ".png";
+        	ar_i_1.setAttribute("src", ar_i);
+        	ar_i = "img/ar_i";
+
+        	ar_d += objetos;
+        	ar_d += ".png";
+        	ar_d_1.setAttribute("src", ar_d);
+        	ar_d = "img/ar_d";
+		}
+      	</script>
+    </body>
+</html>
